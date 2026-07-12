@@ -1,0 +1,8 @@
+{
+  "jestrunner.enableCodeLens": true,
+  "jestrunner.codeLens": [
+    "run",
+    "debug",
+    "**/*.{test,spec,int-spec}.{js,jsx,ts,tsx}"
+  ]
+}
