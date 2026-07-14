@@ -1,8 +1,8 @@
-import { NotFoundError } from 'rxjs';
 import { Entity } from '../entities/entity';
+import { NotFoundError } from '../errors/not-found-error';
 import { RepositoryInterface } from './repository-contracts';
 
-export abstract class InMemoryInterface<
+export abstract class InMemoryRepository<
   E extends Entity,
 > implements RepositoryInterface<E> {
   items: E[] = [];
@@ -27,7 +27,7 @@ export abstract class InMemoryInterface<
     this.items[index] = entity;
   }
 
-  delete(id: string): Promise<void> {
+  async delete(id: string): Promise<void> {
     await this._get(id);
     const index = this.items.findIndex(item => item.id === id);
     this.items.splice(index, 1);
@@ -37,7 +37,7 @@ export abstract class InMemoryInterface<
     const _id = `${id}`;
     const entity = this.items.find(item => item.id === _id);
     if (!entity) {
-      throw new NotFoundError('entity not found');
+      throw new NotFoundError('Entity not found');
     }
     return entity;
   }

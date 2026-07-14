@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 
-export abstract class Entity<Props = any> {
+export abstract class Entity<
+  Props extends Record<string, unknown> = Record<string, unknown>,
+> {
   public readonly _id: string;
   public readonly props: Props;
 
