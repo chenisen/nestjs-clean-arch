@@ -4,9 +4,11 @@ import { ConfigModule, ConfigModuleOptions } from '@nestjs/config';
 import { EnvConfigService } from './env-config.service';
 
 @Module({
+  imports: [ConfigModule],
   providers: [EnvConfigService],
+  exports: [EnvConfigService],
 })
-export class EnvConfigModule {
+export class EnvConfigModule extends ConfigModule {
   static forRoot(options: ConfigModuleOptions = {}): DynamicModule {
     return {
       module: EnvConfigModule,
