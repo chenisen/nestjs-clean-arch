@@ -51,7 +51,6 @@ export class UserPrismaRepository implements UserRepository.Repository {
 
   async update(entity: UserEntity): Promise<void> {
     await this._get(entity.id);
-
     const { id, ...data } = entity.toJSON();
     await this.prismaService.user.update({
       where: { id },
@@ -68,11 +67,13 @@ export class UserPrismaRepository implements UserRepository.Repository {
     props: UserRepository.UserSearchParams,
   ): Promise<UserRepository.UserSearchResult> {
     const where = this.applyFilter(props.filter);
-    const orderBy = this.applySort(props.sort, props.sortDir);
+    const sortable = this.sortableFields?.includes(props.sort) || false;
+    const orderByField = sortable ? props.sort : 'createdAt';
+    const orderByDir = sortable ? props.sortDir : 'desc';
     const [users, total] = await this.prismaService.$transaction([
       this.prismaService.user.findMany({
         where,
-        orderBy,
+        orderBy: { [orderByField]: orderByDir },
         skip: (props.page - 1) * props.perPage,
         take: props.perPage,
       }),
@@ -80,7 +81,7 @@ export class UserPrismaRepository implements UserRepository.Repository {
     ]);
 
     return new UserRepository.UserSearchResult({
-      items: users.map(user => UserModelMapper.toEntity(user)),
+      items: users.map(model => UserModelMapper.toEntity(model)),
       total,
       currentPage: props.page,
       perPage: props.perPage,

@@ -9,7 +9,6 @@ describe('ClassValidatorFields unit tests', () => {
   it('Should initialize errors and validatedData variables with object', () => {
     const sut = new StubClassValidatorFields();
     expect(sut.errors).toMatchObject({});
-    console.log('TESTEE', sut);
     expect(sut.validatedData).toMatchObject({});
   });
 
