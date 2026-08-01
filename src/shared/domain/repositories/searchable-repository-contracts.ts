@@ -63,7 +63,7 @@ export class SearchParams<Filter = string> {
       value === null || value === undefined || value === '' ? null : `${value}`;
   }
 
-  get sortDir() {
+  get sortDir(): SortDirection | null {
     return this._sortDir;
   }
 

@@ -1,4 +1,3 @@
-import { Entity } from '../entities/entity';
 import {
   SearchableRepositoryInterface,
   SearchParams,
@@ -15,6 +14,7 @@ export namespace UserRepository {
 
   export interface Repository extends SearchableRepositoryInterface<
     UserEntity,
+    UserFilter,
     UserSearchParams,
     UserSearchResult
   > {
