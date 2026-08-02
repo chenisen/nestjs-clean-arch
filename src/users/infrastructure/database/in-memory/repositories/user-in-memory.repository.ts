@@ -25,18 +25,19 @@ export class UserInMemoryRepository
     }
   }
 
-  protected applyFilter(
+  protected async applyFilter(
     items: UserEntity[],
     filter: UserRepository.UserFilter,
   ): Promise<UserEntity[]> {
     if (!filter) {
       return items;
     }
-    return items.filter(item => {
+    const filteredItems = items.filter(item => {
       return item.props.name
         .toLocaleLowerCase()
         .includes(filter.toLocaleLowerCase());
     });
+    return filteredItems;
   }
 
   protected async applySort(

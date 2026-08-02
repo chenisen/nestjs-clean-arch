@@ -14,7 +14,6 @@ import {
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { SignupDto } from './dto/signup.dto';
-import { UsersService } from './users.service';
 import { ListUsersUseCase } from '../application/usecases/listusers.usecase';
 import { GetUserUseCase } from '../application/usecases/getuser.usecase';
 import { DeleteUserUseCase } from '../application/usecases/deleteuser.usecase';
@@ -25,6 +24,11 @@ import { UpdatePasswordUseCase } from '../application/usecases/updatepassword.us
 import { SigninDto } from './dto/signin.dto';
 import { ListUsersDto } from './dto/list-users.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import { UserOutput } from '../application/dtos/user-output';
+import {
+  UserCollectionPresenter,
+  UserPresenter,
+} from './presenters/user.presenter';
 
 @Controller('users')
 export class UsersController {
@@ -49,30 +53,46 @@ export class UsersController {
   @Inject(ListUsersUseCase.UseCase)
   private listUsersUseCase: ListUsersUseCase.UseCase;
 
+  static async userToResponse(output: UserOutput) {
+    return new UserPresenter(output);
+  }
+
+  static listUsersToResponse(output: ListUsersUseCase.Output) {
+    return new UserCollectionPresenter(output);
+  }
+
   @Post()
   async create(@Body() signupDto: SignupDto) {
-    return this.signupUseCase.execute(signupDto);
+    const output = await this.signupUseCase.execute(signupDto);
+    return UsersController.userToResponse(output);
   }
 
   @HttpCode(200)
   @Post('login')
   async login(@Body() signinDto: SigninDto) {
-    return this.signinUseCase.execute(signinDto);
+    const output = await this.signinUseCase.execute(signinDto);
+    return UsersController.userToResponse(output);
   }
 
   @Get()
   async search(@Query() searchParams: ListUsersDto) {
-    return this.listUsersUseCase.execute(searchParams);
+    const output = await this.listUsersUseCase.execute(searchParams);
+    return UsersController.listUsersToResponse(output);
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return this.getUserUseCase.execute({ id });
+    const output = await this.getUserUseCase.execute({ id });
+    return UsersController.userToResponse(output);
   }
 
   @Put(':id')
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.updateUserUseCase.execute({ id, ...updateUserDto });
+    const output = await this.updateUserUseCase.execute({
+      id,
+      ...updateUserDto,
+    });
+    return UsersController.userToResponse(output);
   }
 
   @Put(':id')
@@ -80,7 +100,11 @@ export class UsersController {
     @Param('id') id: string,
     @Body() updatePasswordDto: UpdatePasswordDto,
   ) {
-    return this.updatePasswordUseCase.execute({ id, ...updatePasswordDto });
+    const output = await this.updatePasswordUseCase.execute({
+      id,
+      ...updatePasswordDto,
+    });
+    return UsersController.userToResponse(output);
   }
 
   @HttpCode(204)
