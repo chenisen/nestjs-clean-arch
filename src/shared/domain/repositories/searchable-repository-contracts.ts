@@ -3,7 +3,7 @@ import { RepositoryInterface } from './repository-contracts';
 
 export type SortDirection = 'asc' | 'desc';
 
-export type SearchProps<Filter = string> = {
+export type SearchProps<Filter extends string = string> = {
   page?: number;
   perPage?: number;
   sort?: string | null;
@@ -11,7 +11,7 @@ export type SearchProps<Filter = string> = {
   filter?: Filter;
 };
 
-export class SearchParams<Filter = string> {
+export class SearchParams<Filter extends string = string> {
   protected _page: number;
   protected _perPage: number = 15;
   protected _sort: string | null;
@@ -43,7 +43,7 @@ export class SearchParams<Filter = string> {
   }
 
   private set perPage(value: number) {
-    let _perPage = value === true ? this._perPage : +value;
+    let _perPage = typeof value === 'boolean' ? this._perPage : Number(value);
     if (
       Number.isNaN(_perPage) ||
       _perPage <= 0 ||
@@ -80,9 +80,12 @@ export class SearchParams<Filter = string> {
     return this._filter;
   }
 
-  private set filter(value: string) {
-    this._filter =
-      value === null || value === undefined || value === '' ? null : `${value}`;
+  private set filter(value: Filter | null | undefined) {
+    const normalizedValue =
+      value === null || value === undefined || value === ''
+        ? null
+        : String(value);
+    this._filter = normalizedValue as Filter | null;
   }
 }
 
@@ -135,7 +138,7 @@ export class SearchResult<E extends Entity, Filter = string> {
 
 export interface SearchableRepositoryInterface<
   E extends Entity,
-  Filter = string,
+  Filter extends string = string,
   SearchInput = SearchParams<Filter>,
   SearchOutput = SearchResult<E, Filter>,
 > extends RepositoryInterface<E> {

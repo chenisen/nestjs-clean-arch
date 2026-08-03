@@ -7,8 +7,6 @@ export abstract class InMemoryRepository<
 > implements RepositoryInterface<E> {
   items: E[] = [];
 
-  constructor(parameters) {}
-
   async insert(entity: E): Promise<void> {
     this.items.push(entity);
   }
@@ -33,7 +31,7 @@ export abstract class InMemoryRepository<
     this.items.splice(index, 1);
   }
 
-  protected async _get(id: string): Promise<void> {
+  protected async _get(id: string): Promise<E> {
     const _id = `${id}`;
     const entity = this.items.find(item => item.id === _id);
     if (!entity) {

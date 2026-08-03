@@ -95,7 +95,7 @@ export class UsersController {
     return UsersController.userToResponse(output);
   }
 
-  @Put(':id')
+  @Patch(':id/password')
   async updatePassword(
     @Param('id') id: string,
     @Body() updatePasswordDto: UpdatePasswordDto,

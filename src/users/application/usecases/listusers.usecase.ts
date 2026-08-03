@@ -13,7 +13,7 @@ export namespace ListUsersUseCase {
   export type Input = SearchInput;
   export type Output = PaginationOutput;
 
-  export class UseCase implements UseCase<Input, Output> {
+  export class UseCase implements DefaultUseCase<Input, Output> {
     constructor(private userRepository: UserRepository.Repository) {}
     async execute(input: Input): Promise<Output> {
       const params = new UserRepository.UserSearchParams(input);

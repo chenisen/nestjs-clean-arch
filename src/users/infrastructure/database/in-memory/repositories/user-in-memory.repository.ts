@@ -6,7 +6,7 @@ import { UserEntity } from '@/users/domain/entities/user.entity';
 import { UserRepository } from '@/users/domain/repositories/user.repository';
 
 export class UserInMemoryRepository
-  extends InMemorySearchableRepository<UserEntity>
+  extends InMemorySearchableRepository<UserEntity, UserRepository.UserFilter>
   implements UserRepository.Repository
 {
   sortableFields: string[] = ['name', 'createdAt'];
@@ -27,7 +27,7 @@ export class UserInMemoryRepository
 
   protected async applyFilter(
     items: UserEntity[],
-    filter: UserRepository.UserFilter,
+    filter: UserRepository.UserFilter | null,
   ): Promise<UserEntity[]> {
     if (!filter) {
       return items;

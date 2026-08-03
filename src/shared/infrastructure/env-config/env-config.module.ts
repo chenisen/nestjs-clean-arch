@@ -8,7 +8,7 @@ import { EnvConfigService } from './env-config.service';
   providers: [EnvConfigService],
   exports: [EnvConfigService],
 })
-export class EnvConfigModule extends ConfigModule {
+export class EnvConfigModule {
   static forRoot(options: ConfigModuleOptions = {}): DynamicModule {
     return {
       module: EnvConfigModule,

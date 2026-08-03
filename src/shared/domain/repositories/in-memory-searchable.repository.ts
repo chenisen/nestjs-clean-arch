@@ -6,14 +6,24 @@ import {
   SearchableRepositoryInterface,
   SearchParams,
   SearchResult,
+  SortDirection,
 } from './searchable-repository-contracts';
 
-export abstract class InMemorySearchableRepository<E extends Entity>
+export abstract class InMemorySearchableRepository<
+  E extends Entity,
+  Filter extends string = string,
+>
   extends InMemoryRepository<E>
-  implements SearchableRepositoryInterface<E, SearchParams, SearchResult>
+  implements
+    SearchableRepositoryInterface<
+      E,
+      Filter,
+      SearchParams<Filter>,
+      SearchResult<E, Filter>
+    >
 {
   sortableFields: string[] = [];
-  async search(props: SearchParams): Promise<SearchResult<E>> {
+  async search(props: SearchParams<Filter>): Promise<SearchResult<E, Filter>> {
     const itemsFiltered = await this.applyFilter(this.items, props.filter);
     const itemsSorted = await this.applySort(
       itemsFiltered,
@@ -25,7 +35,7 @@ export abstract class InMemorySearchableRepository<E extends Entity>
       props.page,
       props.perPage,
     );
-    return new SearchResult({
+    return new SearchResult<E, Filter>({
       items: itemsPaginated,
       total: itemsFiltered.length,
       currentPage: props.page,
@@ -38,13 +48,13 @@ export abstract class InMemorySearchableRepository<E extends Entity>
 
   protected abstract applyFilter(
     items: E[],
-    filter: string | null,
+    filter: Filter | null,
   ): Promise<E[]>;
 
-  protected applySort(
+  protected async applySort(
     items: E[],
     sort: string | null,
-    sortDir: string | null,
+    sortDir: SortDirection | null,
   ): Promise<E[]> {
     if (!sort || !this.sortableFields.includes(sort)) {
       return items;
@@ -60,10 +70,10 @@ export abstract class InMemorySearchableRepository<E extends Entity>
     });
   }
 
-  protected applyPaginate(
+  protected async applyPaginate(
     items: E[],
-    page: SearchParams['page'],
-    perPage: SearchParams['perPage'],
+    page: SearchParams<Filter>['page'],
+    perPage: SearchParams<Filter>['perPage'],
   ): Promise<E[]> {
     const start = (page - 1) * perPage;
     const limit = start + perPage;
