@@ -13,6 +13,12 @@ import { applyGlobalConfig } from '@/global-config';
 import { UserEntity } from '@/users/domain/entities/user.entity';
 import { UserDataBuilder } from '@/users/domain/testing/helpers/user-data-builder';
 import { createPrismaClient } from '@/shared/infrastructure/database/prisma/prisma-client.factory';
+import { HashProvider } from '@/shared/application/providers/hash-provider';
+import { BcryptjsHashProvider } from '../../providers/hash-provider/bcryptjs-hash.provider';
+
+type LoginResponseData = {
+  accessToken: string;
+};
 
 describe('UsersController e2e tests', () => {
   let app: INestApplication;
@@ -20,6 +26,9 @@ describe('UsersController e2e tests', () => {
   let repository: UserRepository.Repository;
   const prismaService = createPrismaClient();
   let entity: UserEntity;
+  let hashProvider: HashProvider;
+  let hashPassword: string;
+  let accessToken: string;
 
   beforeAll(async () => {
     setupPrismaTests();
@@ -34,12 +43,25 @@ describe('UsersController e2e tests', () => {
     applyGlobalConfig(app);
     await app.init();
     repository = module.get<UserRepository.Repository>('UserRepository');
+    hashProvider = new BcryptjsHashProvider();
+    hashPassword = await hashProvider.generateHash('1234');
   });
 
   beforeEach(async () => {
     await prismaService.user.deleteMany();
-    entity = new UserEntity(UserDataBuilder({}));
+    entity = new UserEntity(
+      UserDataBuilder({
+        email: 'a@a.com',
+        password: hashPassword,
+      }),
+    );
     await repository.insert(entity);
+    const loginResponse = await request(app.getHttpServer())
+      .post('/users/login')
+      .send({ email: 'a@a.com', password: '1234' })
+      .expect(200);
+    const resBody = loginResponse.body as LoginResponseData;
+    accessToken = resBody.accessToken;
   });
 
   afterAll(async () => {
@@ -51,6 +73,7 @@ describe('UsersController e2e tests', () => {
     it('should remove a user', async () => {
       const res = await request(app.getHttpServer())
         .delete(`/users/${entity._id}`)
+        .set('Authorization', `Bearer ${accessToken}`)
         .expect(204)
         .expect({});
     });
@@ -59,6 +82,7 @@ describe('UsersController e2e tests', () => {
       const fakeuuid = crypto.randomUUID();
       const res = await request(app.getHttpServer())
         .delete(`/users/${fakeuuid}`)
+        .set('Authorization', `Bearer ${accessToken}`)
         .expect(404)
         .expect({
           statusCode: 404,
