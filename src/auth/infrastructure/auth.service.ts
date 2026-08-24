@@ -13,11 +13,13 @@ export class AuthService {
   ) {}
 
   async generateJwt(userId: string): Promise<GenerateJwtProps> {
-    const accessToken = await this.jwtService.signAsync({ id: userId }, {});
-    return accessToken;
+    const accessToken = await this.jwtService.signAsync({ id: userId });
+    return {
+      accessToken,
+    };
   }
 
-  async verifyJwt(token: string): Promise<boolean> {
+  async verifyJwt(token: string): Promise<object> {
     return await this.jwtService.verifyAsync(token, {
       secret: this.configService.getJwtSecret(),
     });

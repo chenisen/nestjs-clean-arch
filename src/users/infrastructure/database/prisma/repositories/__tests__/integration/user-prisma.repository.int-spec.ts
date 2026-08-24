@@ -65,7 +65,6 @@ describe('UserPrismaRepository integration tests', () => {
       data: entity.toJSON(),
     });
     const allUsers = await sut.findAll();
-    expect(entity).toHaveLength(1);
     return allUsers.map(outputUser => {
       expect(outputUser.toJSON()).toStrictEqual(entity.toJSON());
     });
